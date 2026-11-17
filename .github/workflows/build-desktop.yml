@@ -1,0 +1,71 @@
+name: Build Desktop
+
+on:
+  push:
+    branches: [main, master]
+  workflow_dispatch:
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: Tiro Bangla ফন্ট নামানো
+        shell: bash
+        continue-on-error: true
+        run: curl -fsSL -o src/main/resources/fonts/TiroBangla-Regular.ttf https://github.com/google/fonts/raw/main/ofl/tirobangla/TiroBangla-Regular.ttf
+
+      - name: VLC (ভিডিও ইঞ্জিন) সাথে জুড়ে দেওয়া
+        shell: pwsh
+        run: |
+          Invoke-WebRequest "https://download.videolan.org/pub/videolan/vlc/3.0.21/win64/vlc-3.0.21-win64.zip" -OutFile vlc.zip
+          Expand-Archive vlc.zip -DestinationPath vlc-tmp
+          New-Item -ItemType Directory -Force resources/windows-x64/vlc | Out-Null
+          Copy-Item "vlc-tmp/vlc-3.0.21/*" resources/windows-x64/vlc -Recurse -Force
+          Remove-Item resources/windows-x64/vlc/locale, resources/windows-x64/vlc/lua, resources/windows-x64/vlc/skins, resources/windows-x64/vlc/hrtfs -Recurse -Force -ErrorAction SilentlyContinue
+
+      - name: কম্পাইল ও প্যাকেজ
+        shell: bash
+        run: |
+          chmod +x gradlew
+          ./gradlew packageMsi createDistributable --no-daemon --stacktrace
+
+      - name: পোর্টেবল জিপ বানানো
+        shell: pwsh
+        run: Compress-Archive -Path "build/compose/binaries/main/app/MuslimTube" -DestinationPath MuslimTube-windows-portable.zip
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: MuslimTube-windows-installer
+          path: build/compose/binaries/main/msi/*.msi
+      - uses: actions/upload-artifact@v4
+        with:
+          name: MuslimTube-windows-portable
+          path: MuslimTube-windows-portable.zip
+
+  linux:
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+      - uses: gradle/actions/setup-gradle@v4
+      - name: ফন্ট
+        continue-on-error: true
+        run: curl -fsSL -o src/main/resources/fonts/TiroBangla-Regular.ttf https://github.com/google/fonts/raw/main/ofl/tirobangla/TiroBangla-Regular.ttf
+      - run: |
+          chmod +x gradlew
+          ./gradlew packageDeb --no-daemon --stacktrace
+      - uses: actions/upload-artifact@v4
+        with:
+          name: MuslimTube-linux-deb
+          path: build/compose/binaries/main/deb/*.deb
