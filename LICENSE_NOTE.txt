@@ -1,0 +1,1 @@
+This project uses NewPipeExtractor (GPLv3). The source of this app must remain public under GPLv3.
