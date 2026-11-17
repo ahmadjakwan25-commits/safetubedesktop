@@ -31,14 +31,14 @@ compose.desktop {
             targetFormats(TargetFormat.Msi, TargetFormat.Exe, TargetFormat.Deb)
             packageName = "MuslimTube"
             packageVersion = "1.0.0"
-            description = "মুসলিম টিউব — ফিল্টারসহ ইউটিউব ক্লায়েন্ট"
+            description = "MuslimTube - filtered YouTube client"
             vendor = "Zakwan Ahmad"
             // CI এখানে VLC বসিয়ে দেয় (resources/windows-x64/vlc), যাতে আলাদা VLC ইনস্টল লাগে না
             appResourcesRootDir.set(project.layout.projectDirectory.dir("resources"))
             modules("java.sql", "jdk.unsupported", "java.naming", "java.management")
             windows {
                 iconFile.set(project.file("packaging/icon.ico"))
-                menuGroup = "মুসলিম টিউব"
+                menuGroup = "MuslimTube"
                 shortcut = true
                 dirChooser = true
                 upgradeUuid = "7d6c0b1e-5b0a-4f6e-9a55-3c2d6b1f9a11"
